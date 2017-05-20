@@ -1,9 +1,15 @@
 #!python
+import os
 import sys
+import pprint
+import json
 
-sys.path.append('C:\\Users\\fmsouza\\PycharmProjects\\Apps\\python-sdk\\lib')
+LIB_PATH = os.path.join('..','python3-sdk','lib')
+print(LIB_PATH)
+sys.path.append(LIB_PATH)
 from meli import Meli
-from bottle import Bottle, run, template, route, request
+
+from bottle import Bottle, run, request
 
 CLIENT_ID = '6383285056445610'
 CLIENT_SECRET = 'Zya79p7R8hLkQaRfficgmEA8bNf30a7B'
@@ -37,24 +43,44 @@ def authorize():
 def index():
     return '''
     <html>
-    <a href='http://localhost:4567/user'>Informações do Usuário</a>
-    <a href='http://localhost:4567/user'>Produtos</a>
-    <a href='http://localhost:4567/user'>Pedidos</a>
-    <a href='http://localhost:4567/user'>Perguntas</a>
-    <a href='http://localhost:4567/user'>Pagamentos</a>
-    <a href='http://localhost:4567/user'>Envios</a>
+    <p><a href='http://localhost:4567/user'>Informações do Usuário\n</a></p>
+    <p><a href='http://localhost:4567/items'>Produtos\n</a></p>
+    <p><a href='http://localhost:4567/user'>Pedidos\n</a></p>
+    <p><a href='http://localhost:4567/user'>Perguntas\n</a></p>
+    <p><a href='http://localhost:4567/user'>Pagamentos\n</a></p>
+    <p><a href='http://localhost:4567/user'>Envios\n</a></p>
+    <p></p>
+    <p><a href='http://localhost:4567/index'>Ir ao índice</a></p>
     </html>
     '''
 
 @app.get('/user')
 def user():
-    response = meli.get("/items/ITEM_ID")
+    response = meli.get("users/256943677")
+    userdata = json.loads(response.text)
+    print(userdata)
     return '''
     <html>
-    <div> ''' + str(response) + ''' </div>
-    <a href='http://localhost:4567/index'>voltar ao índice</a>
+    <p><div> ''' + response.text + ''' </div></p>
+    <p></p>
+    <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
+
+@app.get('/items')
+def user():
+    response = meli.get("items/MLB793080631")
+    itemdata = json.loads(response.text)
+    print(itemdata)
+    return '''
+    <html>
+    <p><div> ''' + response.text + ''' </div></p>
+    <p></p>
+    <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
+    </html>   
+    '''
+
+#793080631
 
 
 @app.error(404)
