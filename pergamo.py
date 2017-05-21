@@ -20,35 +20,30 @@ meli = Meli(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
 app = Bottle()
 
-@app.get('/redirect')
-def redirect():
-    return '''
-    <html>
-    <a href='http://localhost:4567/authorize'>Clique aqui para autenticar</a>
-    </html>
-    '''
 
 @app.get('/login')
 def login():
     return "<a href='" + meli.auth_url(redirect_URI=REDIRECT_URI) + "'>Clique aqui para Login</a>"
 
+@app.get('/redirect')
 @app.get('/authorize')
 def authorize():
     if request.query.get('code'):
         meli.authorize(request.query.get('code'), REDIRECT_URI)
-    return "<a href='http://localhost:4567/index'>Ir ao índice</a>"
+    return "<a href='http://localhost:4567/index'>Usuário Autorizado. Ir ao índice</a>"
 #    return meli.access_token
 
 @app.get('/index')
 def index():
     return '''
     <html>
-    <p><a href='http://localhost:4567/user'>Informações do Usuário\n</a></p>
-    <p><a href='http://localhost:4567/items'>Produtos\n</a></p>
-    <p><a href='http://localhost:4567/user'>Pedidos\n</a></p>
-    <p><a href='http://localhost:4567/user'>Perguntas\n</a></p>
-    <p><a href='http://localhost:4567/user'>Pagamentos\n</a></p>
-    <p><a href='http://localhost:4567/user'>Envios\n</a></p>
+    <h1><p>Menu Principal</p></h1>
+    <p><a href='http://localhost:4567/user'>Informações do Usuário</a></p>
+    <p><a href='http://localhost:4567/items'>Produtos</a></p>
+    <p><a href='http://localhost:4567/user'>Pedidos</a></p>
+    <p><a href='http://localhost:4567/user'>Perguntas</a></p>
+    <p><a href='http://localhost:4567/user'>Pagamentos</a></p>
+    <p><a href='http://localhost:4567/user'>Envios</a></p>
     <p></p>
     <p><a href='http://localhost:4567/index'>Ir ao índice</a></p>
     </html>
@@ -56,7 +51,8 @@ def index():
 
 @app.get('/user')
 def user():
-    response = meli.get("users/256943677")
+    params = {'access_token': meli.access_token}
+    response = meli.get("/users/me", params=params)
     userdata = json.loads(response.text)
     print(userdata)
     return '''
