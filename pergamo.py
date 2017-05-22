@@ -3,6 +3,7 @@ import os
 import sys
 import pprint
 import json
+from bottle import template
 
 LIB_PATH = os.path.join('..','python3-sdk','lib')
 print(LIB_PATH)
@@ -20,6 +21,7 @@ meli = Meli(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
 app = Bottle()
 
+userdata = None
 
 @app.get('/login')
 def login():
@@ -31,15 +33,21 @@ def authorize():
     if request.query.get('code'):
         meli.authorize(request.query.get('code'), REDIRECT_URI)
     return "<a href='http://localhost:4567/index'>Usuário Autorizado. Ir ao índice</a>"
-#    return meli.access_token
+
 
 @app.get('/index')
 def index():
+    global userdata
+    params = {'access_token': meli.access_token}
+    response = meli.get("/users/me", params=params)
+    userdata = json.loads(response.text)
+    print(userdata)
     return '''
     <html>
     <h1><p>Menu Principal</p></h1>
+    <h2><p>'''+str(userdata['nickname'])+'''</p></h2>
     <p><a href='http://localhost:4567/user'>Informações do Usuário</a></p>
-    <p><a href='http://localhost:4567/items'>Produtos</a></p>
+    <p><a href='http://localhost:4567/items'>Anúncios</a></p>
     <p><a href='http://localhost:4567/user'>Pedidos</a></p>
     <p><a href='http://localhost:4567/user'>Perguntas</a></p>
     <p><a href='http://localhost:4567/user'>Pagamentos</a></p>
@@ -51,32 +59,33 @@ def index():
 
 @app.get('/user')
 def user():
-    params = {'access_token': meli.access_token}
-    response = meli.get("/users/me", params=params)
-    userdata = json.loads(response.text)
-    print(userdata)
+    global userdata
     return '''
     <html>
-    <p><div> ''' + response.text + ''' </div></p>
+    <h1><p>Dados do Usuário</p></h1>
+    <p><div> ''' + str(userdata) + ''' </div></p>
     <p></p>
     <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
 
 @app.get('/items')
-def user():
-    response = meli.get("items/MLB793080631")
+def items():
+    global userdata
+    params = {'access_token': meli.access_token}
+    response = meli.get("/users/" + str(userdata['id']) + "/items/search", params=params)
     itemdata = json.loads(response.text)
-    print(itemdata)
+    itemlist = itemdata['results']
+    print(itemdata['results'])
     return '''
     <html>
-    <p><div> ''' + response.text + ''' </div></p>
-    <p></p>
+    <h1><p>Itens Anunciados</p></h1>
+    <p><div> ''' + str(itemdata['results']) + ''' </div></p>
+    '''+ template('simple.tpl', itemdata) + '''
     <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
 
-#793080631
 
 
 @app.error(404)
