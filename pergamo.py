@@ -40,8 +40,7 @@ def index():
     global userdata
     params = {'access_token': meli.access_token}
     response = meli.get("/users/me", params=params)
-    userdata = json.loads(response.text)
-    print(userdata)
+    userdata = response.json()
     return '''
     <html>
     <h1><p>Menu Principal</p></h1>
@@ -74,18 +73,39 @@ def items():
     global userdata
     params = {'access_token': meli.access_token}
     response = meli.get("/users/" + str(userdata['id']) + "/items/search", params=params)
-    itemdata = json.loads(response.text)
-    itemlist = itemdata['results']
-    print(itemdata['results'])
+    items_list = response.json()
     return '''
     <html>
     <h1><p>Itens Anunciados</p></h1>
-    <p><div> ''' + str(itemdata['results']) + ''' </div></p>
-    '''+ template('simple.tpl', itemdata) + '''
+    '''+ template('simple.tpl', items_list) + '''
     <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
 
+@app.get('/item/<item_id>')
+def item_data(item_id):
+    response = (meli.get("/items/"+item_id))
+    jresponse = response.json()
+    result = dict_to_html(jresponse)
+    return '''
+    <html>
+    <h1><p>Dados do item</p></h1>
+    <p><div> ''' + result + ''' </div></p>
+    <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+    </html>   
+    '''
+
+def dict_to_html(dd):
+    """Generate an HTML list of the keys and
+    values in the dictionary dd, return a
+    string containing HTML"""
+
+    html = "<ul>"
+    for key in dd:
+        if key in ["id","site_id","title"]:
+            html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
+    html += "</ul>"
+    return html
 
 
 @app.error(404)
