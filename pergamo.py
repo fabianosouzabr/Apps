@@ -85,15 +85,58 @@ def items():
 def item_data(item_id):
     response = (meli.get("/items/"+item_id))
     jresponse = response.json()
-    print (jresponse)
-    result = dict_to_html(jresponse)
+    print(jresponse)
+    item_details = product_to_html(jresponse)
+
+    response = (meli.get("/items/"+item_id+"/variations"))
+    jresponse = response.json()
+    print(jresponse)
+    variations = dict_to_html(jresponse)
+
     return '''
     <html>
-    <h1><p>Dados do item</p></h1>
-    <p><div> ''' + result + ''' </div></p>
-    <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+        <head>
+        <style>
+        div {
+            text-align: justify;
+            text-justify: inter-word;
+            }
+        </style>
+        </head>
+        <body>
+            <h1><p>Dados do item</p></h1>
+            <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+            <p><div><h2>Detalhes</h2>''' + item_details + ''' </div></p>
+            <p><div><h2>Variações</h2>''' + variations + ''' </div></p>
+            <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+        </body>
     </html>   
     '''
+
+def product_to_html(dd):
+    """Generate an HTML list of the keys and
+    values in the dictionary dd, return a
+    string containing HTML"""
+
+    html = "<ol>"
+    htmla = ""
+    for key in dd:
+        if key in ['id','title','category_id']:
+            html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
+        if key in ['attributes']:
+            htmla = "<h3>Atributos</h3>"
+            attr_list = dd[key]
+            for attr in attr_list:
+                htmla += "____________________________________________<form><ol>"
+                for k2 in attr:
+                    #htmla += "<li><strong>%s: </strong>%s</li>" % (k2, attr[k2])
+                    htmla += '''<li><div><strong>%s: </strong><input type="text" name =%s value=%s></div></li>''' % (k2,k2,attr[k2])
+                htmla += '''</ol><input type="submit" value="Submit"></form>'''
+            htmla += "</ol>"
+    html += "</ol>"
+    html += htmla
+    return html
+
 
 def dict_to_html(dd):
     """Generate an HTML list of the keys and
@@ -102,20 +145,9 @@ def dict_to_html(dd):
 
     html = "<ol>"
     for key in dd:
-        if key in ['id','title','category_id']:
-            html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
-        if key in ['attributes']:
-            html += "<li><h3>Atributos</h2></li> <ol>"
-            attr_list = dd[key]
-            for attr in attr_list:
-                html += "<ol><li>-----------------------</li>"
-                for k2 in attr:
-                    html += "<li><strong>%s: </strong>%s</li>" % (k2, attr[k2])
-                html += "</ol>"
-            html += "</ol>"
+        html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
     html += "</ol>"
     return html
-
 
 @app.error(404)
 def error404(error):
