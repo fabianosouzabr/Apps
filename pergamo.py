@@ -1,8 +1,6 @@
 #!python
 import os
 import sys
-import pprint
-import json
 from bottle import template
 
 LIB_PATH = os.path.join('..','python3-sdk','lib')
@@ -23,6 +21,7 @@ app = Bottle()
 
 userdata = None
 
+@app.get('/')
 @app.get('/login')
 def login():
     return "<a href='" + meli.auth_url(redirect_URI=REDIRECT_URI) + "'>Clique aqui para Login</a>"
@@ -86,6 +85,7 @@ def items():
 def item_data(item_id):
     response = (meli.get("/items/"+item_id))
     jresponse = response.json()
+    print (jresponse)
     result = dict_to_html(jresponse)
     return '''
     <html>
@@ -100,11 +100,20 @@ def dict_to_html(dd):
     values in the dictionary dd, return a
     string containing HTML"""
 
-    html = "<ul>"
+    html = "<ol>"
     for key in dd:
-        if key in ["id","site_id","title"]:
+        if key in ['id','title','category_id']:
             html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
-    html += "</ul>"
+        if key in ['attributes']:
+            html += "<li><h3>Atributos</h2></li> <ol>"
+            attr_list = dd[key]
+            for attr in attr_list:
+                html += "<ol><li>-----------------------</li>"
+                for k2 in attr:
+                    html += "<li><strong>%s: </strong>%s</li>" % (k2, attr[k2])
+                html += "</ol>"
+            html += "</ol>"
+    html += "</ol>"
     return html
 
 
