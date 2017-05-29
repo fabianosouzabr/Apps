@@ -4,7 +4,7 @@ import json
 import sys
 from bottle import template
 
-LIB_PATH = os.path.join('..', 'python3-sdk', 'lib')
+LIB_PATH = os.path.join('.', 'python3-sdk', 'lib')
 print(LIB_PATH)
 sys.path.append(LIB_PATH)
 from meli import Meli
