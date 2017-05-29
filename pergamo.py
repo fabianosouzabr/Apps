@@ -1,9 +1,10 @@
 #!python
 import os
+import json
 import sys
 from bottle import template
 
-LIB_PATH = os.path.join('..','python3-sdk','lib')
+LIB_PATH = os.path.join('..', 'python3-sdk', 'lib')
 print(LIB_PATH)
 sys.path.append(LIB_PATH)
 from meli import Meli
@@ -21,10 +22,12 @@ app = Bottle()
 
 userdata = None
 
+
 @app.get('/')
 @app.get('/login')
 def login():
     return "<a href='" + meli.auth_url(redirect_URI=REDIRECT_URI) + "'>Clique aqui para Login</a>"
+
 
 @app.get('/redirect')
 @app.get('/authorize')
@@ -43,7 +46,7 @@ def index():
     return '''
     <html>
     <h1><p>Menu Principal</p></h1>
-    <h2><p>'''+str(userdata['nickname'])+'''</p></h2>
+    <h2><p>''' + str(userdata['nickname']) + '''</p></h2>
     <p><a href='http://localhost:4567/user'>Informações do Usuário</a></p>
     <p><a href='http://localhost:4567/items'>Anúncios</a></p>
     <p><a href='http://localhost:4567/user'>Pedidos</a></p>
@@ -54,6 +57,7 @@ def index():
     <p><a href='http://localhost:4567/index'>Ir ao índice</a></p>
     </html>
     '''
+
 
 @app.get('/user')
 def user():
@@ -67,6 +71,7 @@ def user():
     </html>   
     '''
 
+
 @app.get('/items')
 def items():
     global userdata
@@ -76,21 +81,22 @@ def items():
     return '''
     <html>
     <h1><p>Itens Anunciados</p></h1>
-    '''+ template('simple.tpl', items_list) + '''
+    ''' + template('simple.tpl', items_list) + '''
     <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
 
+
 @app.get('/item/<item_id>')
 def item_data(item_id):
-    response = (meli.get("/items/"+item_id))
+    response = (meli.get("/items/" + item_id))
     jresponse = response.json()
-    print(jresponse)
+    print("Item Details: " + str(jresponse))
     item_details = product_to_html(jresponse)
 
-    response = (meli.get("/items/"+item_id+"/variations"))
+    response = (meli.get("/items/" + item_id + "/variations"))
     jresponse = response.json()
-    print(jresponse)
+    print("Item Variations: " + str(jresponse))
     variations = dict_to_html(jresponse)
 
     return '''
@@ -113,25 +119,57 @@ def item_data(item_id):
     </html>   
     '''
 
+
 def product_to_html(dd):
     """Generate an HTML list of the keys and
     values in the dictionary dd, return a
     string containing HTML"""
 
-    html = "<ol>"
+    category_id = dd['category_id']
+    print("Category ID: ")
+    print (category_id)
+    response = (meli.get("/categories/" + category_id))
+    category_details = response.json()
+    print ("Category Details: ")
+    print (type(category_details))
+    print (category_details)
+
+    response = (meli.get("/categories/" + category_id +"/attributes"))
+    cat_attrib = json.loads(response.text)
+    category_attributes = {item['id']: item for item in cat_attrib}
+    print ("Category Attributes: ")
+    print (category_attributes)
+
+    html = ""
+    category_path = category_details['path_from_root']
+    for i in range(len(category_path)):
+        cat = category_path[i]
+        html += '''<strong>> %s </strong>''' % (cat['name'])
+    html += "<ol>"
     htmla = ""
     for key in dd:
-        if key in ['id','title','category_id']:
+        if key in ['id', 'title', 'category_id']:
             html += "<li><strong>%s: </strong>%s</li>" % (key, dd[key])
         if key in ['attributes']:
             htmla = "<h3>Atributos</h3>"
+            htmla += '''<style type="text/css">
+                            .fieldset-auto-width 
+                            {display: inline-block;}
+                            </style>'''
             attr_list = dd[key]
             for attr in attr_list:
-                htmla += "____________________________________________<form><ol>"
-                for k2 in attr:
-                    #htmla += "<li><strong>%s: </strong>%s</li>" % (k2, attr[k2])
-                    htmla += '''<li><div><strong>%s: </strong><input type="text" name =%s value=%s></div></li>''' % (k2,k2,attr[k2])
-                htmla += '''</ol><input type="submit" value="Submit"></form>'''
+                htmla += '''<form><div><fieldset class="fieldset-auto-width"><legend>%s (%s)</legend>''' % (attr['id'],attr['name'])
+                #htmla += "--------Grupo de Atributos: %s (%s)</legend>" % (attr['attribute_group_id'], attr['attribute_group_name'])
+                #htmla += '''<div><strong>%s: </strong><input type="text" name =%s value=%s></div>''' % ('value_id', 'value_id', attr['value_id'])
+                if 'values' in category_attributes[attr['id']]:
+                    htmla += '''%s ''' % (attr['value_name'])
+                    htmla += '''<select name="%s">''' % ('value_name')
+                    for n in category_attributes[attr['id']]['values']:
+                        htmla += '''<option value="%s">%s</option>''' % (n['name'],n['name'])
+                    htmla += '''</select>'''
+                else:
+                    htmla += '''<strong>%s: </strong><input type="text" name =%s value=%s>''' % ('value_name', 'value_name', attr['value_name'])
+                htmla += '''<input type="submit" value="Alterar"></fieldset></div></form>'''
             htmla += "</ol>"
     html += "</ol>"
     html += htmla
@@ -149,12 +187,35 @@ def dict_to_html(dd):
     html += "</ol>"
     return html
 
+
+@app.get('/item/<item_id>/add_attributes')
+def add_attributes(item_id):
+    return '''
+    <html>
+        <head>
+        <style>
+        div {
+            text-align: justify;
+            text-justify: inter-word;
+            }
+        </style>
+        </head>
+        <body>
+            <h1><p>Dados do item</p></h1>
+            <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+            <p><div><h2>Detalhes</h2>''' + item_details + ''' </div></p>
+            <p><div><h2>Variações</h2>''' + variations + ''' </div></p>
+            <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
+        </body>
+    </html>   
+    '''
+
+
 @app.error(404)
 def error404(error):
     return 'Erro 404. Parece que não há nada aqui!'
 
+
 run(app, host='localhost', port=4567, reloader=True)
-
-
 
 print(CLIENT_NAME)
