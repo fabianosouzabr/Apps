@@ -1,4 +1,4 @@
-#!python
+#! /usr/bin/python3
 # encoding: utf-8
 import os
 import json
@@ -54,6 +54,7 @@ def index():
     <p><a href='http://localhost:4567/user'>Perguntas</a></p>
     <p><a href='http://localhost:4567/user'>Pagamentos</a></p>
     <p><a href='http://localhost:4567/user'>Envios</a></p>
+    <p><a href='http://localhost:4567/list_categories'>LISTA CATEGORIAS</a></p>
     <p></p>
     <p><a href='http://localhost:4567/index'>Ir ao índice</a></p>
     </html>
@@ -211,6 +212,17 @@ def add_attributes(item_id):
     </html>   
     '''
 
+@app.get('/list_categories')
+def user():
+    global userdata
+    return '''
+    <html>
+    <h1><p>LISTA DE CATEGORIAS</p></h1>
+    <p><div> ''' + str(userdata) + ''' </div></p>
+    <p></p>
+    <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
+    </html>   
+    '''
 
 @app.error(404)
 def error404(error):
