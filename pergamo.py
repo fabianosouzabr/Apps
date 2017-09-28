@@ -3,6 +3,7 @@
 import os
 import json
 import sys
+import pprint
 from bottle import template
 
 LIB_PATH = os.path.join('.', 'python3-sdk', 'lib')
@@ -50,7 +51,7 @@ def index():
     <h2><p>''' + str(userdata['nickname']) + '''</p></h2>
     <p><a href='http://localhost:4567/user'>Informações do Usuário</a></p>
     <p><a href='http://localhost:4567/items'>Anúncios</a></p>
-    <p><a href='http://localhost:4567/user'>Pedidos</a></p>
+    <p><a href='http://localhost:4567/orders'>Pedidos</a></p>
     <p><a href='http://localhost:4567/user'>Perguntas</a></p>
     <p><a href='http://localhost:4567/user'>Pagamentos</a></p>
     <p><a href='http://localhost:4567/user'>Envios</a></p>
@@ -59,7 +60,6 @@ def index():
     <p><a href='http://localhost:4567/index'>Ir ao índice</a></p>
     </html>
     '''
-
 
 @app.get('/user')
 def user():
@@ -87,7 +87,6 @@ def items():
     <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
-
 
 @app.get('/item/<item_id>')
 def item_data(item_id):
@@ -118,6 +117,21 @@ def item_data(item_id):
             <p><div><h2>Variações</h2>''' + variations + ''' </div></p>
             <p><a href='http://localhost:4567/items'>voltar à lista de anúncios</a></p>
         </body>
+    </html>   
+    '''
+
+
+@app.get('/orders')
+def orders():
+    params = {'access_token': meli.access_token}
+    response = meli.get("/orders/search?seller=" + str(userdata['id']) , params=params)
+    jresponse = response.json()
+    pprint.pformat(jresponse)
+    return '''
+    <html>
+    <h1><p>Pedidos:</p></h1>
+    ''' + pprint.pprint(str(jresponse)) + '''
+    <p><a href='http://localhost:4567/index'>voltar ao índice</a></p>
     </html>   
     '''
 

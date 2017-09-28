@@ -1,0 +1,41 @@
+=============================
+    ALGORITMOS DE ANÁLISE
+=============================
+
+1)
+DEMANDA  = MERCADO =   QTDE VENDIDA * PREÇO(1) + QTDE VENDIDA * PREÇO(2) + .... + QTDE VENDIDA * PREÇO(430)
+
+
+2)
+DEMANDA     QTDE VENDIDA * PREÇO(1) + QTDE VENDIDA * PREÇO(2) + .... + QTDE VENDIDA * PREÇO(430)
+-------  = -------------------------------------------------------------------------------------- = X (OPORTUNIDADE)
+OFERTA      QTDE OFERTADA * PREÇO(1) + QTDE OFERTADA * PREÇO(2) + ... +QTDE OFERTADA * PREÇO(430)
+
+3)
+DEMANDA     QTDE VENDIDA * PREÇO(1) + QTDE VENDIDA * PREÇO(2) + .... + QTDE VENDIDA * PREÇO(430)
+-------  = -------------------------------------------------------------------------------------- = X (OPORTUNIDADE)
+PLAYER                                      QTDE PLAYERS
+
+
+
+
+
+4)
+Cálculo do Indice Herfindahl
+(concentração de Mercado)
+https://pt.wikipedia.org/wiki/%C3%8Dndice_Herfindahl
+
+
+
+
+=================
+TO DOS:
+==================
+
+-BUSCAR UPC
+
+-DEFINIR DB
+
+-IMPRIMIR ETIQUETAS
+
+-

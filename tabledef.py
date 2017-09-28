@@ -1,10 +1,17 @@
 from sqlalchemy import *
 from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, TIMESTAMP, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
-engine = create_engine('sqlite:///listings.db', echo=True)
+#engine = create_engine('sqlite:///listings.db', echo=True)
+db_host = 'postgreinstance1.cmqiuzqh62x2.us-east-1.rds.amazonaws.com'
+db_port = 5432
+db_name = "dbpostgre1"
+db_user = "postgremaster1"
+db_pass = "postgremaster1"
+
+engine = create_engine('postgresql://'+db_user+':'+db_pass+'@'+db_host+':'+str(db_port)+'/'+db_name, echo=True)
 Base = declarative_base()
 
 
@@ -14,7 +21,7 @@ class Listing(Base):
     __tablename__ = "listing"
 
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DATETIME)
+    timestamp = Column(TIMESTAMP)
     category_id = Column(String)
     item_id = Column(String)
     seller = Column(String)
